@@ -1,0 +1,28 @@
+# 缩进宽度
+IndentWidth: 4
+
+# 大括号换行风格（如 Allman, Stroustrup, GNU 等）
+BreakBeforeBraces: Attach
+
+# 访问修饰符（public/private）的缩进
+AccessModifierOffset: -4
+
+# 每行最大字符数
+ColumnLimit: 120
+
+# 指针和引用的对齐方式（左对齐或右对齐）
+DerivePointerAlignment: false
+PointerAlignment: Right
+
+AlignAfterOpenBracket: Align
+AllowShortCaseLabelsOnASingleLine: false
+
+AllowShortFunctionsOnASingleLine: None
+# 允许lambda在一行中, 同上, 建议All
+AllowShortLambdasOnASingleLine: None
+# 是否将简单的if(else/else if)语句中的body跟if(else/else if)放置于同一行，可选值
+# - Never: 永远不, 建议值
+# - WithoutElse: 没有else/else if时, 允许
+# - OnlyFirstIf: 只有第一个if允许
+# - AllIfAndElse: 所有的if/else都允许
+AllowShortIfStatementsOnASingleLine: Never
