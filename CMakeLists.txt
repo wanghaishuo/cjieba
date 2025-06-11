@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(jiebaTest C)
+project(cjieba C)
 
 # 设置C标准（可选）
 set(CMAKE_C_STANDARD 11)
@@ -40,3 +40,12 @@ add_executable(jiebaTest
 target_link_libraries(jiebaTest PUBLIC
     cjieba
 )
+
+# for test
+# 添加gtest子模块
+message("gtest build begin!!!")
+add_subdirectory(thirdparty/googletest)
+
+message("test build begin!!!")
+# 包含测试目录
+add_subdirectory(test)

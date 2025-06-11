@@ -13,8 +13,8 @@ typedef struct RuneStr {
     RuneT rune;
     uint32_t offset;
     uint32_t len;
-    uint32_t unicode_offset;
-    uint32_t unicode_length;
+    uint32_t unicodeOffset;
+    uint32_t unicodeLength;
 } RuneStrT;
 
 typedef DynArrT *RuneStrArrT;
