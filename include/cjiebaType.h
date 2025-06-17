@@ -24,7 +24,7 @@ typedef enum CutType {
 } CutTypeT;
 
 typedef struct CutCfg {
-    CutTypeT CutType;
+    CutTypeT cutType;
 } CutCfgT;
 
 typedef struct JieBaWord {

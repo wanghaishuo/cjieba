@@ -68,6 +68,27 @@ ErrorT AddWordToDict(FILE *fd, PrefixDictT *dict) {
 #define PREFIX_RATE 3            // 假设词平均词长3
 #define FALSE_POSITIVE_RATE 1e-4 // 假阳率为万分之一
 
+#ifndef NDEBUG
+// 可用于分析词典所占内存，35w词词典占用约4MB
+static void GetMem() {
+    FILE *file = fopen("/proc/self/status", "r");
+    if (!file) {
+        perror("Failed to open /proc/self/status");
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        if (strstr(line, "VmSize:") != NULL) {
+            printf("%s\n", line);
+        } else if (strstr(line, "VmRSS:") != NULL) {
+            printf("%s\n", line);
+        }
+    }
+
+    fclose(file);
+}
+#endif // NDEBUG
+
 ErrorT BuildPrefixDixt(const char *dafaultDict, const char *userDict, PrefixDictT *dict) {
     LOG_INFO(JIEBA_OK, "|BuildPrefixDixt| build dict begin");
     JIEBA_UNUSED(userDict);
