@@ -2,6 +2,7 @@
 #define C_JIEBA_TYPE_H
 
 #include <stdint.h>
+#include "baseType.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,10 +19,6 @@ typedef struct JieBaCfg {
 } JieBaCfgT;
 
 typedef struct CJieBa CJieBaT;
-
-typedef enum CutType {
-    CUT_BY_PROBABILITY = 0, // 基于概率分词
-} CutTypeT;
 
 typedef struct CutCfg {
     CutTypeT cutType;

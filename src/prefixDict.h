@@ -39,6 +39,11 @@ static inline bool GetWordInfo(PrefixDictT *dict, ConstBufT key, WordInfoT *info
     return true;
 }
 
+// true 表示找到
+static inline bool WordInDict(PrefixDictT *dict, ConstBufT key) {
+    return GetHashValue(dict->map, key) != NULL;
+}
+
 static inline bool IsSeparator(RuneT *separators, RuneT rune) {
     for (uint32_t i = 0; separators[i] != 0; ++i) {
         if (rune == separators[i]) {

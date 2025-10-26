@@ -11,9 +11,9 @@ static string GetDictPath(string dict);
 
 static CJieBaT *g_cJieba = NULL;
 
-static CutCfgT g_cutCfg = {.cutType = CUT_BY_PROBABILITY};
+static CutCfgT g_cutCfg = {.cutType = CUT_ALL};
 
-class CutByProbabilityTest : public ::testing::Test {
+class CutAllTest : public ::testing::Test {
 protected:
     // 整个测试套件执行前的初始化
     static void SetUpTestSuite() {
@@ -69,9 +69,9 @@ static void CutTest(const char *str, vector<string> &result) {
     printf("\n");
 }
 
-TEST_F(CutByProbabilityTest, CutByProbabilityTest001) {
-    char str[] = "他来到了网易杭研大厦";
-    vector<string> result = {"他", "来到", "了", "网易", "杭", "研", "大厦"};
-    CutTest("他来到了网易杭研大厦", result);
+TEST_F(CutAllTest, CutAllTest001) {
+    // vector<string> result = {"他", "来到", "了", "网易", "杭", "研", "大厦"};
+    // CutTest("他来到了网易杭研大厦", result);
+    vector<string> result = {"清华", "清华大学", "华大", "大学"};
     CutTest("清华大学", result);
 }

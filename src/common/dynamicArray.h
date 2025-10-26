@@ -34,6 +34,10 @@ ErrorT DynArrReserve(DynArrT *arr, uint32_t itemNum);
 
 uint32_t DynArrSize(DynArrT *arr);
 
+void PrintIntArr(DynArrT *arr);
+
+void Print2DIntArr(DynArrT *arr);
+
 #ifdef __cplusplus
 }
 #endif

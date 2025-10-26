@@ -125,3 +125,21 @@ void DynArrSetItem(DynArrT *arr, uint32_t index, const void *item) {
     JIEBA_ASSERT(index < arr->itemNum);
     memcpy(arr->items + arr->itemSize * index, item, arr->itemSize);
 }
+
+void PrintIntArr(DynArrT *arr) {
+    JIEBA_ASSERT(arr->itemSize == sizeof(int));
+    uint32_t len = DynArrSize(arr);
+    for (uint32_t i = 0; i < len; ++i) {
+        printf("%d ", *(int *)DynArrItem(arr, i));
+    }
+    printf("\n");
+}
+
+void Print2DIntArr(DynArrT *arr) {
+    JIEBA_ASSERT(arr->itemSize == sizeof(DynArrT *));
+    uint32_t len = DynArrSize(arr);
+    for (uint32_t i = 0; i < len; ++i) {
+        PrintIntArr(*(DynArrPtr *)DynArrItem(arr, i));
+    }
+    printf("\n");
+}
