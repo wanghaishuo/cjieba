@@ -63,10 +63,11 @@ static void CutTest(const char *str, vector<string> &result) {
     int ret = JIEBA_EXE_OK;
     int num = 0;
     while ((ret = JieBaNext(wordList, &word)) == JIEBA_EXE_OK) {
-        printf("%s %d ", word.word, word.length);
+        // printf("%s %d ", word.word, word.length);
         EXPECT_EQ(string(word.word), result[num++]);
     }
-    printf("\n");
+    // printf("\n");
+    FreeWordList(wordList);
 }
 
 TEST_F(CutAllTest, CutAllTest001) {

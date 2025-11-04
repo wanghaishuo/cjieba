@@ -4,6 +4,7 @@
 typedef struct RuneStrLite {
     uint32_t rune; // unicode值
     uint32_t len;
+    uint32_t isAscii;
 } RuneStrLiteT;
 
 // rp len 为0表示非法
@@ -13,11 +14,15 @@ RuneStrLiteT DecodeUTF8ToRune(const char *str, size_t len) {
         JIEBA_ASSERT(false);
         return rp;
     }
-    if (!(str[0] & 0x80)) { // 0xxxxxxx
+    if (!(str[0] & 0x80)) { // 0xxxxxxx ascii码
         // 7bit, total 7bit
         rp.rune = (uint8_t)(str[0]) & 0x7f;
         rp.len = 1;
-    } else if ((uint8_t)str[0] <= 0xdf && 1 < len) {
+        rp.isAscii = true;
+        return rp;
+    }
+    rp.isAscii = false;
+    if ((uint8_t)str[0] <= 0xdf && 1 < len) {
         // 110xxxxxx
         // 5bit, total 5bit
         rp.rune = (uint8_t)(str[0]) & 0x1f;
@@ -81,7 +86,7 @@ ErrorT DecodeUTF8RunesInString(const char *s, size_t len, RuneStrArrT *runes) {
             LOG_ERROR(JIEBA_PARAMETER_WRONG, "|DecodeUTF8RunesInString| DecodeUTF8ToRune len :%u, i: %u wrong", len, i);
             return JIEBA_PARAMETER_WRONG;
         }
-        RuneStrT runeStr = {rp.rune, i, rp.len, j, 1};
+        RuneStrT runeStr = {rp.rune, i, rp.len, j, 1, rp.isAscii};
         ErrorT ret = DynArrPushBack(tmpRunes, &runeStr);
         if (ret != JIEBA_OK) {
             LOG_ERROR(ret, "|DecodeUTF8RunesInString| DynArrPushBack wrong");

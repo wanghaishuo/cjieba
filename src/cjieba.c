@@ -78,7 +78,7 @@ int JieBaCut(CJieBaT *cJieba, const char *sentence, uint32_t length, CutCfgT cfg
     list->sentence[length] = '\0';
     list->lastCh = sentence[0];
     ConstBufT buf = {.buf = sentence, .bufLen = length};
-    ErrorT ret = BaseCut(&cJieba->dict, cfg.cutType ,buf, &list->arr);
+    ErrorT ret = BaseCut(&cJieba->dict, cfg.cutType, buf, &list->arr);
     if (ret != JIEBA_OK) {
         LOG_ERROR(ret, "|JieBaCut| Base Cut wrong");
         goto EXIT;

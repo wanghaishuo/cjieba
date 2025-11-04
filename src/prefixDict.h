@@ -10,8 +10,8 @@ extern "C" {
 #endif
 
 #define SEPARATOR_NUM 30
-// 常用中英文分隔符
-#define SENTENCE_SEPARATOR "，。！？：；“”!,.?\"‘’':&"
+// 常用中英文分隔符, 不包含小数点
+#define SENTENCE_SEPARATOR "，。！？：；“”!,?\"‘’':&"
 
 typedef struct PrefixDict {
     HashMapT *map;        // 词->wordinfo

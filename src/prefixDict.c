@@ -90,24 +90,24 @@ static void GetMem() {
 #endif // NDEBUG
 
 ErrorT BuildPrefixDixt(const char *dafaultDict, const char *userDict, PrefixDictT *dict) {
-    LOG_INFO(JIEBA_OK, "|BuildPrefixDixt| build dict begin");
+    LOG_INFO(JIEBA_OK, "|Build PrefixDixt| build dict begin");
     JIEBA_UNUSED(userDict);
     *dict = (PrefixDictT){};
     FILE *fd1 = NULL;
     if (dafaultDict == NULL || (fd1 = fopen(dafaultDict, "r")) == NULL) {
-        LOG_ERROR(JIEBA_CONFIG_WRONG, "|BuildPrefixDixt| file path wrong");
+        LOG_ERROR(JIEBA_CONFIG_WRONG, "|Build PrefixDixt| file path wrong");
         return JIEBA_CONFIG_WRONG;
     }
     dict->wordNum = GetFileLineNum(fd1);
     HashMapT *map = CreateHashmap(sizeof(WordInfoT), dict->wordNum);
     if (map == NULL) {
-        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|BuildPrefixDixt| CreateHashmap wrong");
+        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Build PrefixDixt| CreateHashmap wrong");
         fclose(fd1);
         return JIEBA_MEMORY_OP_WRONG;
     }
     BloomFilterT *filter = CreateBloomFilter(dict->wordNum * PREFIX_RATE, FALSE_POSITIVE_RATE);
     if (filter == NULL) {
-        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|BuildPrefixDixt| CreateBloomFilter wrong");
+        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Build PrefixDixt| CreateBloomFilter wrong");
         DestroyHashmap(map);
         fclose(fd1);
         return JIEBA_MEMORY_OP_WRONG;
@@ -118,14 +118,14 @@ ErrorT BuildPrefixDixt(const char *dafaultDict, const char *userDict, PrefixDict
     if (ret != JIEBA_OK) {
         DestroyPrefixDixt(dict);
         fclose(fd1);
-        LOG_ERROR(ret, "|BuildPrefixDixt| AddWordToMap wrong");
+        LOG_ERROR(ret, "|Build PrefixDixt| AddWordToMap wrong");
         return ret;
     }
     ret = GetSeparator(dict);
     if (ret != JIEBA_OK) {
         DestroyPrefixDixt(dict);
         fclose(fd1);
-        LOG_ERROR(ret, "|BuildPrefixDixt| GetSeparator wrong");
+        LOG_ERROR(ret, "|Build PrefixDixt| GetSeparator wrong");
         return ret;
     }
     return JIEBA_OK;

@@ -31,6 +31,7 @@ typedef enum Error {
     JIEBA_MEMORY_OP_WRONG = 200,
     JIEBA_CONFIG_WRONG = 300,
     JIEBA_PARAMETER_WRONG = 400,
+    JIEBA_SCAN_END= 500,
 } ErrorT;
 
 #ifdef __cplusplus

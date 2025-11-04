@@ -1,5 +1,6 @@
 #include "cutBase.h"
 #include "log.h"
+#include <ctype.h>
 #include <math.h>
 
 #define BASE_WORD_LEN 2
@@ -95,7 +96,7 @@ ErrorT CalcRouteNodeArr(PrefixDictT *dict, SentToCutT sentence, DagT dag, RouteN
         }
         RouteNode(arr, i)->cutLen = cutLen + 1;
         RouteNode(arr, i)->score = score;
-        RouteNode(arr, i)->wordLen = len;
+        RouteNode(arr, i)->wordLen = wordLen;
         RouteNode(arr, i)->offset = offset;
     }
     *outArr = arr;
@@ -173,6 +174,11 @@ static inline void ClearCutPrepare(CutPrepareT cutPrepare, bool keepwordOutArr) 
     }
 }
 
+// 将小数点、字母、数字分一起
+static inline bool AsciiRule(char c) {
+    return isalnum(c) || c == '.';
+}
+
 static ErrorT CutByProbability(PrefixDictT *dict, SentToCutT sentence, WordOutArrT wordOutArr) {
     if (sentence.begin == sentence.end) { // 说明在两个分隔符中间
         return JIEBA_OK;
@@ -195,12 +201,28 @@ static ErrorT CutByProbability(PrefixDictT *dict, SentToCutT sentence, WordOutAr
         uint32_t right = RunesItem(sentence.runes, i)->offset;
         RouteNodeT *node = RouteNode(nodeArr, i);
         WordOutT word = {.offset = node->offset, .len = node->wordLen};
+        // 数字或字母开头
+        if (node->wordLen != 1 || !isalnum(((const char *)sentence.buf.buf)[word.offset])) {
+            i += node->cutLen; // unicode的偏移
+        } else {
+            uint32_t wordLen = node->wordLen;
+            i++;
+            while (i < nodeArrSize) {
+                node = RouteNode(nodeArr, i);
+                if (node->wordLen != 1 || !AsciiRule(((const char *)sentence.buf.buf)[word.offset])) {
+                    break;
+                }
+                wordLen++;
+                assert(node->cutLen == 1);
+                i += node->cutLen; // unicode的偏移
+            }
+            word.len = wordLen;
+        }
         ret = DynArrPushBack(wordOutArr, &word);
         if (ret != JIEBA_OK) {
             LOG_ERROR(ret, "|CutBy Probability| DynArr PushBack wrong");
             goto EXIT;
         }
-        i += node->cutLen; // unicode的偏移
     }
 EXIT:
     DestroyDynArr(nodeArr);
@@ -231,7 +253,7 @@ static ErrorT CutAll(PrefixDictT *dict, SentToCutT sentence, WordOutArrT wordOut
         uint32_t wordMaxLen = DagItem(dag, i);
         uint32_t len = RunesItem(runes, begin + i)->len;
         uint32_t offset = RunesItem(runes, begin + i)->offset;
-        if(wordMaxLen == 1 && offset >= endOffset){
+        if (wordMaxLen == 1 && offset >= endOffset) {
             WordOutT word = {.offset = offset, .len = len};
             ret = DynArrPushBack(wordOutArr, &word);
             if (ret != JIEBA_OK) {
