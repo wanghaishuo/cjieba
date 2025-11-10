@@ -32,7 +32,7 @@ static inline void CheckProbability(uint32_t itemNum, double probability, uint32
 BloomFilterT *CreateBloomFilter(uint32_t itemNum, double probability) {
     BloomFilterT *filter = malloc(sizeof(BloomFilterT));
     if (filter == NULL) {
-        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|CreateBloomFilter| malloc filter wrong");
+        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Create BloomFilter| malloc filter wrong");
         return NULL;
     }
     *filter = (BloomFilterT){};
@@ -43,7 +43,7 @@ BloomFilterT *CreateBloomFilter(uint32_t itemNum, double probability) {
     filter->bitArr = calloc(filter->bitSize, 1);
     if (filter->bitArr == NULL) {
         free(filter);
-        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|CreateBloomFilter| malloc bitArr wrong");
+        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Create BloomFilter| malloc bitArr wrong");
         return NULL;
     }
     return filter;

@@ -101,13 +101,13 @@ ErrorT BuildPrefixDixt(const char *dafaultDict, const char *userDict, PrefixDict
     dict->wordNum = GetFileLineNum(fd1);
     HashMapT *map = CreateHashmap(sizeof(WordInfoT), dict->wordNum);
     if (map == NULL) {
-        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Build PrefixDixt| CreateHashmap wrong");
+        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Build PrefixDixt| Create Hashmap wrong");
         fclose(fd1);
         return JIEBA_MEMORY_OP_WRONG;
     }
     BloomFilterT *filter = CreateBloomFilter(dict->wordNum * PREFIX_RATE, FALSE_POSITIVE_RATE);
     if (filter == NULL) {
-        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Build PrefixDixt| CreateBloomFilter wrong");
+        LOG_ERROR(JIEBA_MEMORY_OP_WRONG, "|Build PrefixDixt| Create BloomFilter wrong");
         DestroyHashmap(map);
         fclose(fd1);
         return JIEBA_MEMORY_OP_WRONG;

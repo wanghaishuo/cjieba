@@ -41,7 +41,7 @@ void FreeDag(DagT dag) {
 }
 
 // 获取词频的对数（未找到返回1，对应的概率为0）
-double GetFreq(PrefixDictT *dict, ConstBufT key) {
+static double inline GetFreq(PrefixDictT *dict, ConstBufT key) {
     WordInfoT info;
     if (GetWordInfo(dict, key, &info)) {
         return log(info.freq);
@@ -61,6 +61,10 @@ typedef DynArrT *RouteNodeArrT;
 
 static inline RouteNodeT *RouteNode(RouteNodeArrT arr, uint32_t index) {
     return (RouteNodeT *)DynArrItem(arr, index);
+}
+
+static bool DoubleEqual(double d1, double d2) {
+    return d1 - d2 < 1e-7 && d2 - d1 < 1e-7;
 }
 
 // 对于“我喜欢夏天”，返回的数组为[1,2,1,2,1,0]
@@ -87,7 +91,11 @@ ErrorT CalcRouteNodeArr(PrefixDictT *dict, SentToCutT sentence, DagT dag, RouteN
         for (uint32_t j = 0; j < wordMaxLen; ++j) {
             len += RunesItem(runes, begin + i + j)->len;
             ConstBufT key = {.buf = buf + offset, .bufLen = len};
-            double tmpScore = GetFreq(dict, key) - totalFreq + RouteNode(arr, i + j + 1)->score;
+            double freq = GetFreq(dict, key);
+            if (j > 0 && DoubleEqual(freq, 1.0)) {
+                continue;
+            }
+            double tmpScore = freq - totalFreq + RouteNode(arr, i + j + 1)->score;
             if (tmpScore > score) {
                 score = tmpScore;
                 cutLen = j;
@@ -241,7 +249,7 @@ static ErrorT CutAll(PrefixDictT *dict, SentToCutT sentence, WordOutArrT wordOut
     DagT dag;
     ErrorT ret = GenDag(dict, sentence, &dag);
     if (ret != JIEBA_OK) {
-        LOG_ERROR(ret, "|Cut all| GenDag wrong");
+        LOG_ERROR(ret, "|Cut all| Gen Dag wrong");
         return ret;
     }
     RuneStrArrT runes = sentence.runes;
