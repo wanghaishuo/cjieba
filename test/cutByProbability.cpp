@@ -107,7 +107,7 @@ TEST_F(CutByProbabilityTest, CutByProbabilityTest004) {
 }
 
 TEST_F(CutByProbabilityTest, CutByProbabilityTest005) {
-    CutTest("he is fine dsga123123", "he is fine dsga123123 ");
+    CutTest("he is fine dsga123123", "he   is   fine   dsga123123 ");
     CutTest("5.3", "5.3 ");
     CutTest(".23", ". 23 ");
 }

@@ -56,23 +56,29 @@ static string GetDictPath(string dict) {
     return path;
 }
 
-static void CutTest(const char *str, vector<string> &result) {
+static void CutTest(const char *str, string result) {
     WordListT *wordList = NULL;
     ASSERT_EQ(JieBaCut(g_cJieba, str, strlen(str), g_cutCfg, &wordList), JIEBA_EXE_OK);
     JieBaWordT word;
     int ret = JIEBA_EXE_OK;
     int num = 0;
+    string tmp;
     while ((ret = JieBaNext(wordList, &word)) == JIEBA_EXE_OK) {
-        // printf("%s %d ", word.word, word.length);
-        EXPECT_EQ(string(word.word), result[num++]);
+        tmp += string(word.word, word.length);
+        tmp += " ";
     }
-    // printf("\n");
-    FreeWordList(wordList);
+    cout << tmp << endl;
+    EXPECT_EQ(tmp, result);
 }
 
 TEST_F(CutAllTest, CutAllTest001) {
-    // vector<string> result = {"他", "来到", "了", "网易", "杭", "研", "大厦"};
-    // CutTest("他来到了网易杭研大厦", result);
-    vector<string> result = {"清华", "清华大学", "华大", "大学"};
-    CutTest("清华大学", result);
+    CutTest("清华大学", "清华 清华大学 华大 大学 ");
+}
+
+TEST_F(CutAllTest, CutAllTest002) {
+    CutTest("c语言很cbc语言", "c语言 语言 很 cb c语言 语言 ");
+}
+
+TEST_F(CutAllTest, CutAllTest003) {
+    CutTest("cbad bc哈哈cb,ui和ai", "cbad   bc 哈哈 cb , ui 和 ai ");
 }

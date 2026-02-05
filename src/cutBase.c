@@ -1,5 +1,6 @@
 #include "cutBase.h"
 #include "log.h"
+#include "util.h"
 #include <ctype.h>
 #include <math.h>
 
@@ -31,7 +32,7 @@ ErrorT GenDag(PrefixDictT *dict, SentToCutT sentence, DagT *outDag) {
         }
         DynArrPushBack(dag, &wordMaxLen);
     }
-    // PrintIntArr(dag);
+    PrintIntArr(dag);
     *outDag = dag;
     return JIEBA_OK;
 }
@@ -262,13 +263,27 @@ static ErrorT CutAll(PrefixDictT *dict, SentToCutT sentence, WordOutArrT wordOut
         uint32_t len = RunesItem(runes, begin + i)->len;
         uint32_t offset = RunesItem(runes, begin + i)->offset;
         if (wordMaxLen == 1 && offset >= endOffset) {
-            WordOutT word = {.offset = offset, .len = len};
+            // 非数字或字母开头，单字加入
+            if (!isalnum(((const char *)buf)[offset])) {
+                WordOutT word = {.offset = offset, .len = len};
+                ret = DynArrPushBack(wordOutArr, &word);
+                if (ret != JIEBA_OK) {
+                    LOG_ERROR(ret, "|Cut All| Dyn Arr Push Back wrong");
+                    goto EXIT;
+                }
+                endOffset = MAX(endOffset, offset + len);
+                continue;
+            }
+            uint32_t j = 1;
+            for (; i + j < dagSize && DagItem(dag, i + j) == 1 && AsciiRule(((const char *)buf)[offset + j]); ++j) {
+            }
+            WordOutT word = {.offset = offset, .len = j};
             ret = DynArrPushBack(wordOutArr, &word);
             if (ret != JIEBA_OK) {
                 LOG_ERROR(ret, "|Cut All| Dyn Arr Push Back wrong");
                 goto EXIT;
             }
-            endOffset = offset + len + 1;
+            endOffset = MAX(endOffset, offset + j);
             continue;
         }
         for (uint32_t j = 1; j < wordMaxLen; ++j) {
@@ -281,7 +296,7 @@ static ErrorT CutAll(PrefixDictT *dict, SentToCutT sentence, WordOutArrT wordOut
                     LOG_ERROR(ret, "|Cut All| Dyn Arr Push Back wrong");
                     goto EXIT;
                 }
-                endOffset = offset + len + 1;
+                endOffset = MAX(endOffset, offset + len);
             }
         }
     }

@@ -99,9 +99,8 @@ int JieBaNext(WordListT *list, JieBaWordT *word) {
     word->length = wordOut.len;
 
     uint32_t newLastPos = wordOut.offset + wordOut.len;
-    char newLastCh = list->sentence[newLastPos];
     list->sentence[list->lastChPos] = list->lastCh;
-    list->lastCh = newLastCh;
+    list->lastCh = list->sentence[newLastPos];
     list->sentence[newLastPos] = '\0';
     list->lastChPos = newLastPos;
 
