@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME}Test
     commonTest.cpp
     initTest.cpp
     cutByProbability.cpp
+    cutAll.cpp
 )
 
 # 链接gtest库

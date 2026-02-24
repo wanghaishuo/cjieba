@@ -39,6 +39,7 @@ typedef struct WordList {
     WordOutArrT arr;
     uint32_t index; // 访问到第几个元素
     char lastCh;
+    uint32_t lastChPos;
 } WordListT;
 
 // 释放wordlist
@@ -57,7 +58,6 @@ void FreeWordList(WordListT *list) {
 }
 
 int JieBaCut(CJieBaT *cJieba, const char *sentence, uint32_t length, CutCfgT cfg, WordListT **wordList) {
-    JIEBA_UNUSED(cfg);
     if (sentence == NULL || length == 0) {
         LOG_ERROR(SENTENCE_INVALID, "|JieBaCut| sentence invalid");
         return SENTENCE_INVALID;
@@ -78,9 +78,9 @@ int JieBaCut(CJieBaT *cJieba, const char *sentence, uint32_t length, CutCfgT cfg
     list->sentence[length] = '\0';
     list->lastCh = sentence[0];
     ConstBufT buf = {.buf = sentence, .bufLen = length};
-    ErrorT ret = BaseCut(&cJieba->dict, buf, &list->arr);
+    ErrorT ret = BaseCut(&cJieba->dict, cfg.cutType, buf, &list->arr);
     if (ret != JIEBA_OK) {
-        LOG_ERROR(ret, "|JieBaCut| BaseCut wrong");
+        LOG_ERROR(ret, "|JieBaCut| Base Cut wrong");
         goto EXIT;
     }
     *wordList = list;
@@ -97,9 +97,13 @@ int JieBaNext(WordListT *list, JieBaWordT *word) {
     WordOutT wordOut = WordArrItem(list->arr, list->index);
     word->word = list->sentence + wordOut.offset;
     word->length = wordOut.len;
-    list->sentence[wordOut.offset] = list->lastCh;
-    list->lastCh = list->sentence[wordOut.offset + wordOut.len];
-    list->sentence[wordOut.offset + wordOut.len] = '\0';
+
+    uint32_t newLastPos = wordOut.offset + wordOut.len;
+    list->sentence[list->lastChPos] = list->lastCh;
+    list->lastCh = list->sentence[newLastPos];
+    list->sentence[newLastPos] = '\0';
+    list->lastChPos = newLastPos;
+
     list->index++;
     return JIEBA_OK;
 }

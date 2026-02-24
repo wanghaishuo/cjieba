@@ -10,8 +10,8 @@ extern "C" {
 #endif
 
 #define SEPARATOR_NUM 30
-// 常用中英文分隔符
-#define SENTENCE_SEPARATOR "，。！？：；“”!,.?\"‘’':&"
+// 常用中英文分隔符, 不包含小数点
+#define SENTENCE_SEPARATOR "，。！？：；“”!,?\"‘’':& "
 
 typedef struct PrefixDict {
     HashMapT *map;        // 词->wordinfo
@@ -37,6 +37,11 @@ static inline bool GetWordInfo(PrefixDictT *dict, ConstBufT key, WordInfoT *info
     }
     *info = *(WordInfoT *)ptr;
     return true;
+}
+
+// true 表示找到
+static inline bool WordInDict(PrefixDictT *dict, ConstBufT key) {
+    return GetHashValue(dict->map, key) != NULL;
 }
 
 static inline bool IsSeparator(RuneT *separators, RuneT rune) {

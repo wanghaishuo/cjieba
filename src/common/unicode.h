@@ -15,6 +15,7 @@ typedef struct RuneStr {
     uint32_t len;
     uint32_t unicodeOffset;
     uint32_t unicodeLength;
+    bool isAscii;
 } RuneStrT;
 
 typedef DynArrT *RuneStrArrT;
@@ -29,6 +30,11 @@ static inline RuneStrT *RunesItem(RuneStrArrT runes, uint32_t index) {
 
 static inline RuneT *RuneArrItem(BaseRuneArr baseRunes, uint32_t index) {
     return (RuneT *)DynArrItem(baseRunes, index);
+}
+
+static inline bool IsAscii(char c) {
+    // 检查最高位是否为0（ASCII字符的最高位都是0）
+    return ((c & 0x80) == 0);
 }
 
 #ifdef __cplusplus

@@ -2,6 +2,7 @@
 #define CUT_BASE_H
 
 #include "prefixDict.h"
+#include "baseType.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,8 +27,8 @@ typedef struct WordOut {
 // outDag为出参，为二维数组
 ErrorT GenDag(PrefixDictT *dict, SentToCutT sentence, DagT *outDag);
 
-static inline PosArrT DagItem(DagT dag, uint32_t i) {
-    return *(PosArrT *)DynArrItem(dag, i);
+static inline uint32_t DagItem(DagT dag, uint32_t i) {
+    return *(uint32_t *)DynArrItem(dag, i);
 }
 
 static inline uint32_t PosArrItem(PosArrT arr, uint32_t i) {
@@ -37,7 +38,7 @@ static inline uint32_t PosArrItem(PosArrT arr, uint32_t i) {
 void FreeDag(DagT dag);
 
 // 成功后需调用DestroyDynArr释放资源
-ErrorT BaseCut(PrefixDictT *dict, ConstBufT buf, WordOutArrT *arr);
+ErrorT BaseCut(PrefixDictT *dict, CutTypeT type, ConstBufT buf, WordOutArrT *arr);
 
 static inline WordOutT WordArrItem(WordOutArrT arr, uint32_t index) {
     return *(WordOutT *)DynArrItem(arr, index);
