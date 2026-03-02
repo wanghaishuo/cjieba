@@ -243,64 +243,104 @@ static inline WordOutT SeparatorWord(RuneStrArrT runes, uint32_t index) {
     return (WordOutT){.offset = item->offset, .len = item->len};
 }
 
+// 添加词语并更新 endOffset
+static inline ErrorT PushWordAndUpdate(WordOutArrT arr, uint32_t offset, uint32_t len, uint32_t *endOffset) {
+    WordOutT word = {.offset = offset, .len = len};
+    ErrorT ret = DynArrPushBack(arr, &word);
+    if (ret != JIEBA_OK) {
+        LOG_ERROR(ret, "|Push Word And Update| Dyn Arr Push Back wrong");
+        return ret;
+    }
+    *endOffset = MAX(*endOffset, offset + len);
+    return JIEBA_OK;
+}
+
+// 上下文结构体，封装共享数据
+typedef struct CutAllContext{
+    PrefixDictT *dict;
+    DagT dag;
+    RuneStrArrT runes;
+    uint32_t begin;
+    const void *buf;
+    WordOutArrT wordOutArr;
+    uint32_t *endOffset;
+} CutAllContextT;
+
+// 处理单字或连续字母数字分支
+static ErrorT HandleSingleCharCase(CutAllContextT *ctx, uint32_t i, uint32_t offset, uint32_t len) {
+    const char *p = (const char *)ctx->buf + offset;
+    if (!isalnum(*p)) {  // 非字母数字开头，直接输出单字
+        return PushWordAndUpdate(ctx->wordOutArr, offset, len, ctx->endOffset);
+    }
+
+    // 字母数字开头，找出连续的长度
+    uint32_t j = 1;
+    while (i + j < DynArrSize(ctx->dag) && DagItem(ctx->dag, i + j) == 1 && AsciiRule(p[j])) {
+        ++j;
+    }
+    return PushWordAndUpdate(ctx->wordOutArr, offset, j, ctx->endOffset);
+}
+
+// 处理多字词分支
+static ErrorT HandleMultiCharCase(CutAllContextT *ctx, uint32_t i, uint32_t offset,
+                                  uint32_t firstLen, uint32_t wordMaxLen) {
+    uint32_t totalLen = firstLen;
+    for (uint32_t j = 1; j < wordMaxLen; ++j) {
+        totalLen += RunesItem(ctx->runes, ctx->begin + i + j)->len;
+        ConstBufT key = {.buf = (const char*)ctx->buf + offset, .bufLen = totalLen};
+        if (WordInDict(ctx->dict, key)) {
+            ErrorT ret = PushWordAndUpdate(ctx->wordOutArr, offset, totalLen, ctx->endOffset);
+            if (ret != JIEBA_OK) {
+                LOG_ERROR(ret, "|Handle Multi Char Case| Push Word And Update wrong");
+                return ret;
+            }
+        }
+    }
+    return JIEBA_OK;
+}
+
+// 主函数
 static ErrorT CutAll(PrefixDictT *dict, SentToCutT sentence, WordOutArrT wordOutArr) {
-    if (sentence.begin == sentence.end) { // 说明在两个分隔符中间
+    if (sentence.begin == sentence.end) {
         return JIEBA_OK;
     }
+
     DagT dag;
     ErrorT ret = GenDag(dict, sentence, &dag);
     if (ret != JIEBA_OK) {
         LOG_ERROR(ret, "|Cut all| Gen Dag wrong");
         return ret;
     }
-    RuneStrArrT runes = sentence.runes;
-    uint32_t begin = sentence.begin;
-    uint32_t dagSize = DynArrSize(dag);
-    const void *buf = sentence.buf.buf;
+
     uint32_t endOffset = 0;
+    CutAllContextT ctx = {
+        .dict = dict,
+        .dag = dag,
+        .runes = sentence.runes,
+        .begin = sentence.begin,
+        .buf = sentence.buf.buf,
+        .wordOutArr = wordOutArr,
+        .endOffset = &endOffset
+    };
+
+    uint32_t dagSize = DynArrSize(dag);
     for (uint32_t i = 0; i < dagSize; ++i) {
         uint32_t wordMaxLen = DagItem(dag, i);
-        uint32_t len = RunesItem(runes, begin + i)->len;
-        uint32_t offset = RunesItem(runes, begin + i)->offset;
+        uint32_t len = RunesItem(sentence.runes, sentence.begin + i)->len;
+        uint32_t offset = RunesItem(sentence.runes, sentence.begin + i)->offset;
+
         if (wordMaxLen == 1 && offset >= endOffset) {
-            // 非数字或字母开头，单字加入
-            if (!isalnum(((const char *)buf)[offset])) {
-                WordOutT word = {.offset = offset, .len = len};
-                ret = DynArrPushBack(wordOutArr, &word);
-                if (ret != JIEBA_OK) {
-                    LOG_ERROR(ret, "|Cut All| Dyn Arr Push Back wrong");
-                    goto EXIT;
-                }
-                endOffset = MAX(endOffset, offset + len);
-                continue;
-            }
-            uint32_t j = 1;
-            for (; i + j < dagSize && DagItem(dag, i + j) == 1 && AsciiRule(((const char *)buf)[offset + j]); ++j) {
-            }
-            WordOutT word = {.offset = offset, .len = j};
-            ret = DynArrPushBack(wordOutArr, &word);
-            if (ret != JIEBA_OK) {
-                LOG_ERROR(ret, "|Cut All| Dyn Arr Push Back wrong");
-                goto EXIT;
-            }
-            endOffset = MAX(endOffset, offset + j);
-            continue;
+            ret = HandleSingleCharCase(&ctx, i, offset, len);
+        } else if (wordMaxLen > 1) {
+            ret = HandleMultiCharCase(&ctx, i, offset, len, wordMaxLen);
         }
-        for (uint32_t j = 1; j < wordMaxLen; ++j) {
-            len += RunesItem(runes, begin + i + j)->len;
-            ConstBufT key = {.buf = buf + offset, .bufLen = len};
-            if (WordInDict(dict, key)) {
-                WordOutT word = {.offset = offset, .len = len};
-                ret = DynArrPushBack(wordOutArr, &word);
-                if (ret != JIEBA_OK) {
-                    LOG_ERROR(ret, "|Cut All| Dyn Arr Push Back wrong");
-                    goto EXIT;
-                }
-                endOffset = MAX(endOffset, offset + len);
-            }
+        // wordMaxLen == 1 && offset < endOffset 跳过
+
+        if (ret != JIEBA_OK) {
+            break;
         }
     }
-EXIT:
+
     FreeDag(dag);
     return ret;
 }
