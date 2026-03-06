@@ -65,7 +65,7 @@ ErrorT AddWordToDict(FILE *fd, PrefixDictT *dict) {
     return JIEBA_OK;
 }
 
-#define PREFIX_RATE 3            // 假设词平均词长3
+#define PREFIX_RATE 4            // 假设词平均词长4
 #define FALSE_POSITIVE_RATE 1e-4 // 假阳率为万分之一
 
 #ifndef NDEBUG

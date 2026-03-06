@@ -1,5 +1,6 @@
 #include "cjieba.h"
 #include "log.h"
+#include <chrono>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <string>
@@ -83,6 +84,7 @@ static void CutTest(const char *str, string result) {
     }
     cout << tmp << endl;
     EXPECT_EQ(tmp, result);
+    FreeWordList(wordList);
 }
 
 TEST_F(CutByProbabilityTest, CutByProbabilityTest001) {
@@ -130,4 +132,31 @@ TEST_F(CutByProbabilityTest, CutByProbabilityTest006) {
                  "屁股 上 的 尘土 ， 然后 双手 伸到 前面 去 摸 胀 鼓鼓的 肚子 ， 里面 装满 了 西瓜 、 黄金 瓜 、 "
                  "老太婆 瓜 ， 还有 黄瓜 和 桃子 。 许 三观 摸 着 肚子 对 他 的 叔叔 说 ： “ 我 要 去 结婚 了 。 ” ";
     CutTest(str, ans);
+}
+
+TEST_F(CutByProbabilityTest, CutByProbabilityTest007) {
+    WordListT *wordList = NULL;
+    const char *jiebaPath = getenv("CJIEBA_PATH");
+    ASSERT_NE(jiebaPath, nullptr);
+    string novel(jiebaPath);
+    novel += "/test/三国演义.txt";
+    std::ifstream file1(novel);
+    ASSERT_TRUE(file1.is_open());
+    // 将文件内容读入字符串
+    std::string content((std::istreambuf_iterator<char>(file1)),
+                         std::istreambuf_iterator<char>());
+    file1.close();
+
+    auto start = std::chrono::high_resolution_clock::now();
+    ASSERT_EQ(JieBaCut(g_cJieba, content.c_str(), content.size(), g_cutCfg, &wordList), JIEBA_EXE_OK);
+    auto end = std::chrono::high_resolution_clock::now();
+    FreeWordList(wordList);
+
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    double kb = static_cast<double>(content.size()) / 1024.0;
+
+    // 输出结果
+    std::cout << "文件大小: " << kb << "KB" << std::endl;
+    std::cout << "分词耗时: " << duration.count() << " 毫秒"  << std::endl;
+    std::cout << "分词速率: " << kb / duration.count() << " KB/ms"  << std::endl;
 }
