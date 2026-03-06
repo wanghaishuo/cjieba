@@ -8,7 +8,7 @@ extern "C" {
 typedef enum CutType {
     CUT_BY_PROBABILITY = 0, // 基于概率分词
     CUT_ALL,
-    CUT_TYPE_END
+    CUT_TYPE_END = 20
 } CutTypeT;
 
 #ifdef __cplusplus

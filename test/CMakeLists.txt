@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # 创建测试可执行文件
-add_executable(${PROJECT_NAME}Test
+add_executable(${PROJECT_NAME}
     commonTest.cpp
     initTest.cpp
     cutByProbability.cpp
@@ -16,7 +16,7 @@ add_executable(${PROJECT_NAME}Test
 )
 
 # 链接gtest库
-target_link_libraries(${PROJECT_NAME}Test
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
     gtest_main        # 提供默认main函数
     gmock_main        # 如果需要mock功能（可选）

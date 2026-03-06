@@ -33,11 +33,11 @@ target_link_libraries(cjieba PUBLIC
     commonlib
 )
 
-add_executable(jiebaTest
+add_executable(demo
     main.c
 )
 
-target_link_libraries(jiebaTest PUBLIC
+target_link_libraries(demo PUBLIC
     cjieba
 )
 
