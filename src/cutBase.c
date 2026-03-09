@@ -32,7 +32,7 @@ ErrorT GenDag(PrefixDictT *dict, SentToCutT sentence, DagT *outDag) {
         }
         DynArrPushBack(dag, &wordMaxLen);
     }
-    PrintIntArr(dag);
+    // PrintIntArr(dag);
     *outDag = dag;
     return JIEBA_OK;
 }
@@ -285,15 +285,24 @@ static ErrorT HandleSingleCharCase(CutAllContextT *ctx, uint32_t i, uint32_t off
 static ErrorT HandleMultiCharCase(CutAllContextT *ctx, uint32_t i, uint32_t offset,
                                   uint32_t firstLen, uint32_t wordMaxLen) {
     uint32_t totalLen = firstLen;
+    bool addWord = false;
     for (uint32_t j = 1; j < wordMaxLen; ++j) {
         totalLen += RunesItem(ctx->runes, ctx->begin + i + j)->len;
         ConstBufT key = {.buf = (const char*)ctx->buf + offset, .bufLen = totalLen};
         if (WordInDict(ctx->dict, key)) {
+            addWord = true;
             ErrorT ret = PushWordAndUpdate(ctx->wordOutArr, offset, totalLen, ctx->endOffset);
             if (ret != JIEBA_OK) {
                 LOG_ERROR(ret, "|Handle Multi Char Case| Push Word And Update wrong");
                 return ret;
             }
+        }
+    }
+    if(!addWord && offset >= *(ctx->endOffset)){
+        ErrorT ret = PushWordAndUpdate(ctx->wordOutArr, offset, firstLen, ctx->endOffset);
+        if (ret != JIEBA_OK) {
+            LOG_ERROR(ret, "|Handle Multi Char Case| Push Word And Update wrong");
+            return ret;
         }
     }
     return JIEBA_OK;
